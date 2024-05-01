@@ -30,7 +30,7 @@ if conexion:
 @app.route('/')
 def index():
     # Función para la página principal
-    return render_template('index.html')
+    return render_template('templates/index.html')
 
 @app.route('/generar_factura')
 def generar_factura():
