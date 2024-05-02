@@ -2,7 +2,7 @@
 CREATE DATABASE IF NOT EXISTS ventaFactura;
 USE ventaFactura;
 
--- Tabla para almacenar información de clientes
+-- Tabla para almacenar informaciï¿½n de clientes
 CREATE TABLE IF NOT EXISTS Cliente (
     RUC_Cliente VARCHAR(11) PRIMARY KEY, 
     Nombre_Cliente VARCHAR(60) NOT NULL,
@@ -11,14 +11,14 @@ CREATE TABLE IF NOT EXISTS Cliente (
     Telefono_Cliente VARCHAR(15)
 );
 
--- Tabla para almacenar información de vendedores
+-- Tabla para almacenar informaciï¿½n de vendedores
 CREATE TABLE IF NOT EXISTS Vendedor (
     Codigo_Vendedor VARCHAR(9) PRIMARY KEY, 
     Nombre_Vendedor VARCHAR(60) NOT NULL,
     Apellido_Vendedor VARCHAR(60) NOT NULL
 );
 
--- Tabla para almacenar información de artículos
+-- Tabla para almacenar informaciï¿½n de artï¿½culos
 CREATE TABLE IF NOT EXISTS Articulo (
     Codigo_Item INT PRIMARY KEY, 
     Descripcion VARCHAR(30), 
@@ -49,13 +49,6 @@ CREATE TABLE IF NOT EXISTS Cuerpo_Factura (
     PRIMARY KEY(Numero_Factura, Codigo_Item)
 );
 
--- Tabla para almacenar inventario
-CREATE TABLE IF NOT EXISTS Inventario (
-    Codigo_Item INT PRIMARY KEY,
-    Stock INT,
-    Fecha_Actualizacion DATE,
-    FOREIGN KEY(Codigo_Item) REFERENCES Articulo(Codigo_Item)
-);
 
 -- Procedimiento almacenado para insertar un nuevo cliente
 DELIMITER //
@@ -85,7 +78,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- Disparador para evitar inserción de clientes duplicados
+-- Disparador para evitar inserciï¿½n de clientes duplicados
 DELIMITER //
 CREATE TRIGGER Cliente_Insert_Duplicate 
 BEFORE INSERT ON Cliente
@@ -94,12 +87,12 @@ BEGIN
     DECLARE count_clientes INT;
     SELECT COUNT(*) INTO count_clientes FROM Cliente WHERE RUC_Cliente = NEW.RUC_Cliente;
     IF count_clientes > 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: La inserción del cliente está intentando duplicar una clave primaria.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: La inserciï¿½n del cliente estï¿½ intentando duplicar una clave primaria.';
     END IF;
 END //
 DELIMITER ;
 
--- Disparador para evitar inserción de vendedores duplicados
+-- Disparador para evitar inserciï¿½n de vendedores duplicados
 DELIMITER //
 CREATE TRIGGER Vendedor_Insert_Duplicate 
 BEFORE INSERT ON Vendedor
@@ -108,14 +101,14 @@ BEGIN
     DECLARE count_vendedores INT;
     SELECT COUNT(*) INTO count_vendedores FROM Vendedor WHERE Codigo_Vendedor = NEW.Codigo_Vendedor;
     IF count_vendedores > 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: La inserción del vendedor está intentando duplicar una clave primaria.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: La inserciï¿½n del vendedor estï¿½ intentando duplicar una clave primaria.';
     END IF;
 END //
 DELIMITER ;
 
--- Procedimiento almacenado para insertar un artículo y actualizar el inventario
+-- Procedimiento almacenado para insertar un artï¿½culo y actualizar el inventario
 DELIMITER //
-CREATE PROCEDURE InsertarArticuloEInventario(
+CREATE PROCEDURE InsertarArticulo(
     IN p_Descripcion VARCHAR(30),
     IN p_Precio DECIMAL(6,2),
     IN p_Stock INT
@@ -125,18 +118,11 @@ BEGIN
 
     -- Insertar en la tabla Articulo
     INSERT INTO Articulo (Descripcion, Precio)
-    VALUES (p_Descripcion, p_Precio);
-
-    -- Obtener el código del artículo insertado
-    SET p_Codigo_Item = LAST_INSERT_ID();
-
-    -- Insertar en la tabla Inventario
-    INSERT INTO Inventario (Codigo_Item, Stock, Fecha_Actualizacion)
-    VALUES (p_Codigo_Item, p_Stock, CURRENT_DATE());
+    VALUES (p_Descripcion, p_Precio)
 END //
 DELIMITER ;
 
--- Disparador para evitar inserción de artículos duplicados
+-- Disparador para evitar inserciï¿½n de artï¿½culos duplicados
 DELIMITER //
 CREATE TRIGGER Articulo_Insert_Duplicate 
 BEFORE INSERT ON Articulo
@@ -145,12 +131,12 @@ BEGIN
     DECLARE count_articulos INT;
     SELECT COUNT(*) INTO count_articulos FROM Articulo WHERE Codigo_Item = NEW.Codigo_Item;
     IF count_articulos > 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: La inserción del artículo está intentando duplicar una clave primaria.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: La inserciï¿½n del artï¿½culo estï¿½ intentando duplicar una clave primaria.';
     END IF;
 END //
 DELIMITER ;
 
--- Disparador para verificar la existencia de un número de factura en la tabla Cabecera_Factura
+-- Disparador para verificar la existencia de un nï¿½mero de factura en la tabla Cabecera_Factura
 DELIMITER //
 CREATE TRIGGER Verificar_Numero_Factura
 BEFORE INSERT ON Cuerpo_Factura
@@ -159,12 +145,12 @@ BEGIN
     DECLARE factura_existente INT;
     SELECT COUNT(*) INTO factura_existente FROM Cabecera_Factura WHERE Numero_Factura = NEW.Numero_Factura;
     IF factura_existente = 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: El número de factura ingresado no existe en la tabla Cabecera_Factura.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: El nï¿½mero de factura ingresado no existe en la tabla Cabecera_Factura.';
     END IF;
 END //
 DELIMITER ;
 
--- Procedimiento almacenado para actualizar información de un cliente
+-- Procedimiento almacenado para actualizar informaciï¿½n de un cliente
 DELIMITER //
 CREATE PROCEDURE ActualizarCliente(
     IN p_RUC_Cliente VARCHAR(11),
@@ -183,7 +169,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- Procedimiento almacenado para actualizar información de un vendedor
+-- Procedimiento almacenado para actualizar informaciï¿½n de un vendedor
 DELIMITER //
 CREATE PROCEDURE ActualizarVendedor(
     IN p_Codigo_Vendedor VARCHAR(9),
@@ -198,7 +184,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- Procedimiento almacenado para actualizar información de un artículo
+-- Procedimiento almacenado para actualizar informaciï¿½n de un artï¿½culo
 DELIMITER //
 CREATE PROCEDURE ActualizarArticulo(
     IN p_Codigo_Item INT,
@@ -213,7 +199,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- Procedimiento almacenado para seleccionar todos los artículos
+-- Procedimiento almacenado para seleccionar todos los artï¿½culos
 DELIMITER //
 CREATE PROCEDURE SeleccionarArticulos()
 BEGIN
@@ -235,17 +221,6 @@ CREATE PROCEDURE SeleccionarVendedores()
 BEGIN
     SELECT * FROM Vendedor;
 END //
-DELIMITER ;
-
--- Procedimiento almacenado para seleccionar todo el inventario
-DELIMITER //
-CREATE PROCEDURE SeleccionarInventario()
-BEGIN
-    SELECT I.Codigo_Item, I.Stock, I.Fecha_Actualizacion, A.Descripcion, A.Precio
-    FROM Inventario I
-    INNER JOIN Articulo A ON I.Codigo_Item = A.Codigo_Item;
-END //
-DELIMITER ;
-
+DELIMITER 
 
 
