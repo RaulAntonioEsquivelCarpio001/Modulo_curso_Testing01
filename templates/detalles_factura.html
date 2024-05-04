@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detalles de la Factura</title>
+    <style>
+        /* Estilos para la tabla principal */
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .main-table th, .main-table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .main-table th {
+            background-color: #f2f2f2;
+        }
+
+        /* Estilos para la tabla de cuerpo de factura */
+        .body-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .body-table th, .body-table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .btn {
+            background-color: #4CAF50; /* Verde */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #45a049; /* Verde más oscuro */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Detalles de la Factura</h1>
+    <h2>Cabecera de Factura</h2>
+    <table class="main-table">
+        <thead>
+            <tr>
+                <th>Número de Factura</th>
+                <th>Fecha de Factura</th>
+                <th>Cliente</th>
+                <th>Dirección</th>
+                <th>Teléfono</th>
+                <th>Vendedor</th>
+                <th>Subtotal</th>
+                <th>IGV</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in detalles_factura %}
+            <tr>
+                <td>{{ detalle['Numero_Factura'] }}</td>
+                <td>{{ detalle['Fecha_Factura'] }}</td>
+                <td>{{ detalle['Nombre_Cliente'] }} {{ detalle['Apellido_Cliente'] }}</td>
+                <td>{{ detalle['Direccion_Cliente'] }}</td>
+                <td>{{ detalle['Telefono_Cliente'] }}</td>
+                <td>{{ detalle['Nombre_Vendedor'] }} {{ detalle['Apellido_Vendedor'] }}</td>
+                <td>{{ detalle['Subtotal'] }}</td>
+                <td>{{ detalle['IGV'] }}</td>
+                <td>{{ detalle['Total_Factura'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Detalles de Cuerpo de Factura</h2>
+    <table class="body-table">
+        <thead>
+            <tr>
+                <th>Artículo</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in detalles_factura %}
+            <tr>
+                <td>{{ detalle['Articulo'] }}</td>
+                <td>{{ detalle['Cantidad'] }}</td>
+                <td>{{ detalle['Precio'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/ver_factura" class="btn">Regresar</a>
+</body>
+</html>

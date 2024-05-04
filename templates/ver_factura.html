@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ver Facturas</title>
+    <style>
+        /* Estilos para la tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        /* Estilos para los botones */
+        .btn {
+            background-color: #4CAF50; /* Verde */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #45a049; /* Verde más oscuro */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cabeceras de Facturas</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Número de Factura</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Ver Detalles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for factura in cabeceras_facturas %}
+            <tr>
+                <td>{{ factura['Numero_Factura'] }}</td>
+                <td>{{ factura['Fecha_Factura'] }}</td>
+                <td>{{ factura['Total_Factura'] }}</td>
+                <td><a href="/detalles_factura/{{ factura['Numero_Factura'] }}" class="btn">Detalles</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/" class="btn">Regresar al Inicio</a>
+</body>
+</html>
