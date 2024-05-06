@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generar Factura</title>
+    <style>
+        /* Estilos para la tabla principal */
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .main-table th, .main-table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .main-table th {
+            background-color: #f2f2f2;
+        }
+
+        /* Estilos para los campos de entrada */
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        /* Estilos para el botón de guardar */
+        .btn {
+            background-color: #4CAF50; /* Verde */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #45a049; /* Verde más oscuro */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generar Factura</h1>
+    <form action="/guardar_factura" method="POST">
+        <h2>Cabecera de Factura</h2>
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th>Número de Factura</th>
+                    <th>Fecha de Factura</th>
+                    <th>Cliente</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Vendedor</th>
+                    <th>Subtotal</th>
+                    <th>IGV</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="numero_factura" class="input-field"></td>
+                    <td><input type="date" name="fecha_factura" class="input-field"></td>
+                    <td>
+                        <select name="ruc_cliente" id="cliente" class="input-field">
+                            <option value="">Seleccionar Cliente</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente['RUC_Cliente'] }}">{{ cliente['Nombre_Cliente'] }} {{ cliente['Apellido_Cliente'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="text" name="direccion_cliente" id="direccion" class="input-field" readonly></td>
+                    <td><input type="text" name="telefono_cliente" id="telefono" class="input-field" readonly></td>
+                    <td>
+                        <select name="codigo_vendedor" class="input-field">
+                            <option value="">Seleccionar Vendedor</option>
+                            {% for vendedor in vendedores %}
+                                <option value="{{ vendedor['Codigo_Vendedor'] }}">{{ vendedor['Nombre_Vendedor'] }} {{ vendedor['Apellido_Vendedor'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="number" name="subtotal" id="subtotal" class="input-field" readonly></td>
+                    <td><input type="number" name="igv" id="igv" class="input-field" oninput="updateTotal()"></td>
+                    <td><input type="number" name="total_factura" id="total" class="input-field" readonly></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Detalles de Cuerpo de Factura</h2>
+        <table class="main-table" id="cuerpo-factura">
+            <thead>
+                <tr>
+                    <th>Artículo</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <select name="articulo_1" class="input-field" onchange="updatePrice(this)">
+                            <option value="" selected>Seleccionar Artículo</option>
+                            {% for articulo in articulos %}
+                                <option value="{{ articulo['Codigo_Item'] }}">{{ articulo['Descripcion'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="number" name="cantidad_1" class="input-field" oninput="updateSubtotal()"></td>
+                    <td><input type="number" name="precio_1" class="input-field" oninput="updateSubtotal()" step="any"></td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" onclick="agregarArticulo()" class="btn">Agregar Artículo</button>
+        <button type="submit" class="btn">Guardar Factura</button>
+    </form>
+    <!-- Botón para regresar al índice -->
+    <a href="/" class="btn">Regresar al Inicio</a>
+
+    <script>
+        // Función para llenar automáticamente la dirección y el teléfono del cliente al seleccionar uno
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('cliente').addEventListener('change', function() {
+                var clienteSeleccionado = this.value;
+                var clientes = {{ clientes | tojson }};
+                var cliente = clientes.find(c => c.RUC_Cliente === clienteSeleccionado);
+                document.getElementById('direccion').value = cliente ? cliente.Direccion_Cliente : '';
+                document.getElementById('telefono').value = cliente ? cliente.Telefono_Cliente : '';
+            });
+        });
+
+        // Función para actualizar el precio al seleccionar un artículo
+        function updatePrice(select) {
+            var itemCode = select.value;
+            var articulos = {{ articulos | tojson }};
+            var selectedArticulo = articulos.find(a => a.Codigo_Item == itemCode);
+            var precioField = select.parentElement.nextElementSibling.nextElementSibling.querySelector('input');
+            precioField.value = selectedArticulo ? selectedArticulo.Precio : '';
+            updateSubtotal();
+        }
+
+        // Función para actualizar el subtotal y el total
+        function updateSubtotal() {
+            var subtotal = 0;
+            var rows = document.querySelectorAll('#cuerpo-factura tbody tr');
+            rows.forEach(function(row) {
+                var cantidad = parseFloat(row.querySelector('input[name^="cantidad"]').value);
+                var precio = parseFloat(row.querySelector('input[name^="precio"]').value);
+                subtotal += cantidad * precio;
+            });
+            document.getElementById('subtotal').value = subtotal.toFixed(2);
+            updateTotal();
+        }
+
+        // Función para actualizar el total en base al subtotal y al IGV
+        function updateTotal() {
+            var subtotal = parseFloat(document.getElementById('subtotal').value);
+            var igv = parseFloat(document.getElementById('igv').value);
+            var total = subtotal * (1 + igv / 100);
+            document.getElementById('total').value = total.toFixed(2);
+        }
+
+        // Función para agregar una nueva fila de artículo en la tabla
+        function agregarArticulo() {
+            var bodyTable = document.getElementById('cuerpo-factura').getElementsByTagName('tbody')[0];
+            var newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>
+                    <select name="nuevo_articulo" class="input-field" onchange="updatePrice(this)">
+                        <option value="" selected>Seleccionar Artículo</option>
+                        {% for articulo in articulos %}
+                            <option value="{{ articulo['Codigo_Item'] }}">{{ articulo['Descripcion'] }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="number" name="nueva_cantidad" class="input-field" oninput="updateSubtotal()"></td>
+                <td><input type="number" name="nuevo_precio" class="input-field" oninput="updateSubtotal()"></td>
+            `;
+            bodyTable.appendChild(newRow);
+        }
+    </script>
+</body>
+</html>

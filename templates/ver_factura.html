@@ -45,6 +45,8 @@
                 <th>Fecha</th>
                 <th>Total</th>
                 <th>Ver Detalles</th>
+                <th>Eliminar</th>
+                <th>Editar</th> 
             </tr>
         </thead>
         <tbody>
@@ -54,10 +56,21 @@
                 <td>{{ factura['Fecha_Factura'] }}</td>
                 <td>{{ factura['Total_Factura'] }}</td>
                 <td><a href="/detalles_factura/{{ factura['Numero_Factura'] }}" class="btn">Detalles</a></td>
+                <td><button onclick="eliminarFactura('{{ factura['Numero_Factura'] }}')" class="btn">Eliminar</button></td>
+                <td><a href="/editar_factura/{{ factura['Numero_Factura'] }}" class="btn">Editar</a></td> <!-- Botón de editar -->
             </tr>
             {% endfor %}
         </tbody>
     </table>
     <a href="/" class="btn">Regresar al Inicio</a>
+
+    <script>
+        function eliminarFactura(numeroFactura) {
+            if (confirm('¿Está seguro de que desea eliminar esta factura?')) {
+                // Redirigir al endpoint de eliminación con el número de factura como parámetro
+                window.location.href = "/eliminar_factura/" + numeroFactura;
+            }
+        }
+    </script>
 </body>
 </html>

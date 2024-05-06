@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS Vendedor (
 CREATE TABLE IF NOT EXISTS Articulo (
     Codigo_Item INT AUTO_INCREMENT PRIMARY KEY, 
     Descripcion VARCHAR(30), 
-    Precio DECIMAL(6,2)
+    Precio DECIMAL(8,2)
 );
 
 -- Tabla para almacenar cabeceras de factura
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS Cuerpo_Factura (
     Numero_Factura VARCHAR(30), 
     Codigo_Item INT, 
     Cantidad INT, 
-    Precio_Venta DECIMAL(6,2),
+    Precio_Venta DECIMAL(8,2),
     FOREIGN KEY(Numero_Factura) REFERENCES Cabecera_Factura(Numero_Factura),
     FOREIGN KEY(Codigo_Item) REFERENCES Articulo(Codigo_Item),
     PRIMARY KEY(Numero_Factura, Codigo_Item)
