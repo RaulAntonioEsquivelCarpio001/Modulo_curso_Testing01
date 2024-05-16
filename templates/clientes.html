@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Clientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Lista de Clientes</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>RUC</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Dirección</th>
+                <th>Teléfono</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente['RUC_Cliente'] }}</td>
+                <td>{{ cliente['Nombre_Cliente'] }}</td>
+                <td>{{ cliente['Apellido_Cliente'] }}</td>
+                <td>{{ cliente['Direccion_Cliente'] }}</td>
+                <td>{{ cliente['Telefono_Cliente'] }}</td>
+                <td>
+                    <a href="/eliminar_cliente/{{ cliente['RUC_Cliente'] }}" class="btn">Eliminar</a>
+                    <a href="/editar_cliente/{{ cliente['RUC_Cliente'] }}" class="btn">Editar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/" class="btn">Regresar al Inicio</a>
+    <a href="/agregar_cliente" class="btn">Agregar Cliente</a>
+
+</body>
+</html>

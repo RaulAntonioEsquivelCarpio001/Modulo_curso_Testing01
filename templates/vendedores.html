@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Vendedores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+        }
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Lista de Vendedores</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vendedor in vendedores %}
+            <tr>
+                <td>{{ vendedor['Codigo_Vendedor'] }}</td>
+                <td>{{ vendedor['Nombre_Vendedor'] }}</td>
+                <td>{{ vendedor['Apellido_Vendedor'] }}</td>
+                <td>
+                    <a href="/eliminar_vendedor/{{ vendedor['Codigo_Vendedor'] }}" class="btn">Eliminar</a>
+                    <a href="/editar_vendedor/{{ vendedor['Codigo_Vendedor'] }}" class="btn">Editar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/" class="btn">Regresar al Inicio</a>
+    <a href="/agregar_vendedor" class="btn">Agregar Vendedor</a>
+
+</body>
+</html>
+

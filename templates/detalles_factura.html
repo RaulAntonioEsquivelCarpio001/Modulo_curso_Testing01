@@ -65,19 +65,17 @@
             </tr>
         </thead>
         <tbody>
-            {% for detalle in detalles_factura %}
             <tr>
-                <td>{{ detalle['Numero_Factura'] }}</td>
-                <td>{{ detalle['Fecha_Factura'] }}</td>
-                <td>{{ detalle['Nombre_Cliente'] }} {{ detalle['Apellido_Cliente'] }}</td>
-                <td>{{ detalle['Direccion_Cliente'] }}</td>
-                <td>{{ detalle['Telefono_Cliente'] }}</td>
-                <td>{{ detalle['Nombre_Vendedor'] }} {{ detalle['Apellido_Vendedor'] }}</td>
-                <td>{{ detalle['Subtotal'] }}</td>
-                <td>{{ detalle['IGV'] }}</td>
-                <td>{{ detalle['Total_Factura'] }}</td>
+                <td>{{ detalles_factura[0]['Numero_Factura'] }}</td>
+                <td>{{ detalles_factura[0]['Fecha_Factura'] }}</td>
+                <td>{{ detalles_factura[0]['Nombre_Cliente'] }} {{ detalles_factura[0]['Apellido_Cliente'] }}</td>
+                <td>{{ detalles_factura[0]['Direccion_Cliente'] }}</td>
+                <td>{{ detalles_factura[0]['Telefono_Cliente'] }}</td>
+                <td>{{ detalles_factura[0]['Nombre_Vendedor'] }} {{ detalles_factura[0]['Apellido_Vendedor'] }}</td>
+                <td>{{ detalles_factura[0]['Subtotal'] }}</td>
+                <td>{{ detalles_factura[0]['IGV'] }}</td>
+                <td>{{ detalles_factura[0]['Total_Factura'] }}</td>
             </tr>
-            {% endfor %}
         </tbody>
     </table>
 

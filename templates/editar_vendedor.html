@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar Vendedor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+        }
+        form {
+            width: 50%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            color: #007bff;
+        }
+        input[type="text"], input[type="submit"] {
+            padding: 8px;
+            margin-bottom: 10px;
+            width: 100%;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 10px 20px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Editar Vendedor</h1>
+
+    <form action="/editar_vendedor/{{ vendedor['Codigo_Vendedor'] }}" method="POST">
+        <label for="nombre_vendedor">Nombre:</label><br>
+        <input type="text" id="nombre_vendedor" name="nombre_vendedor" value="{{ vendedor['Nombre_Vendedor'] }}"><br>
+        <label for="apellido_vendedor">Apellido:</label><br>
+        <input type="text" id="apellido_vendedor" name="apellido_vendedor" value="{{ vendedor['Apellido_Vendedor'] }}"><br>
+        <input type="submit" value="Guardar Cambios">
+    </form>
+
+</body>
+</html>

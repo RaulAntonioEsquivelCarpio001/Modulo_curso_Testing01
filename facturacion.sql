@@ -202,6 +202,23 @@ DELIMITER ;
 
 DELIMITER //
 
+CREATE PROCEDURE ActualizarArticulo(
+    IN p_Codigo_Item INT,
+    IN p_Descripcion VARCHAR(30),
+    IN p_Precio DECIMAL(8,2)
+)
+BEGIN
+    UPDATE Articulo
+    SET Descripcion = p_Descripcion,
+        Precio = p_Precio
+    WHERE Codigo_Item = p_Codigo_Item;
+END//
+
+DELIMITER ;
+
+
+DELIMITER //
+
 DELIMITER //
 
 CREATE PROCEDURE dtlleFact(
@@ -239,15 +256,4 @@ END //
 
 DELIMITER ;
 
-
-
-CALL InsertarCliente('12345678901', 'Juan', 'Pérez', 'Calle Principal 123', '123456789');
-CALL InsertarVendedor('71949154', 'Jackson', 'Smith');
-CALL InsertarArticulo('Camisa', 25.99);
--- Insertar una factura de ejemplo
-INSERT INTO Cabecera_Factura (Numero_Factura, Fecha_Factura, RUC_Cliente, Codigo_Vendedor, Subtotal, IGV, Total_Factura)
-VALUES ('FACT-001', '2024-05-02', '12345678901', '71949154', 100.00, 18.00, 118.00);
--- Insertar detalles de la factura (cuerpo de la factura)
-INSERT INTO Cuerpo_Factura (Numero_Factura, Codigo_Item, Cantidad, Precio_Venta)
-VALUES ('FACT-001', 1, 2, 50.00);
 

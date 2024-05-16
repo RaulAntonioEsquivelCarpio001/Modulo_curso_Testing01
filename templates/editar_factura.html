@@ -49,7 +49,7 @@
 <body>
     <h1>Editar Factura</h1>
     <form action="/editar_factura/{{ factura['Numero_Factura'] }}" method="POST">
-
+        <h2>Cabecera de Factura</h2>
         <table class="main-table">
             <thead>
                 <tr>
@@ -69,24 +69,26 @@
                     <td><input type="text" name="numero_factura" class="input-field" value="{{ factura['Numero_Factura'] }}" readonly></td>
                     <td><input type="date" name="fecha_factura" class="input-field" value="{{ factura['Fecha_Factura'] }}"></td>
                     <td>
-                        <select name="ruc_cliente" class="input-field">
+                        <select name="ruc_cliente" id="cliente" class="input-field">
+                            <option value="">Seleccionar Cliente</option>
                             {% for cliente in clientes %}
-                                <option value="{{ cliente['RUC_Cliente'] }}" {% if cliente['RUC_Cliente'] == factura['RUC_Cliente'] %} selected {% endif %}>{{ cliente['Nombre_Cliente'] }} {{ cliente['Apellido_Cliente'] }}</option>
+                                <option value="{{ cliente['RUC_Cliente'] }}" {% if cliente['RUC_Cliente'] == factura['RUC_Cliente'] %}selected{% endif %}>{{ cliente['Nombre_Cliente'] }} {{ cliente['Apellido_Cliente'] }}</option>
                             {% endfor %}
                         </select>
                     </td>
-                    <td><input type="text" name="direccion_cliente" class="input-field" value="{{ factura['Direccion_Cliente'] }}"></td>
-                    <td><input type="text" name="telefono_cliente" class="input-field" value="{{ factura['Telefono_Cliente'] }}"></td>
+                    <td><input type="text" name="direccion_cliente" id="direccion" class="input-field" value="{{ factura['Direccion_Cliente'] }}"></td>
+                    <td><input type="text" name="telefono_cliente" id="telefono" class="input-field" value="{{ factura['Telefono_Cliente'] }}"></td>
                     <td>
                         <select name="codigo_vendedor" class="input-field">
+                            <option value="">Seleccionar Vendedor</option>
                             {% for vendedor in vendedores %}
-                                <option value="{{ vendedor['Codigo_Vendedor'] }}" {% if vendedor['Codigo_Vendedor'] == factura['Codigo_Vendedor'] %} selected {% endif %}>{{ vendedor['Nombre_Vendedor'] }} {{ vendedor['Apellido_Vendedor'] }}</option>
+                                <option value="{{ vendedor['Codigo_Vendedor'] }}" {% if vendedor['Codigo_Vendedor'] == factura['Codigo_Vendedor'] %}selected{% endif %}>{{ vendedor['Nombre_Vendedor'] }} {{ vendedor['Apellido_Vendedor'] }}</option>
                             {% endfor %}
                         </select>
                     </td>
-                    <td><input type="number" name="subtotal" class="input-field" value="{{ factura['Subtotal'] }}" readonly></td>
-                    <td><input type="number" name="igv" class="input-field" value="{{ factura['IGV'] }}" readonly></td>
-                    <td><input type="number" name="total_factura" class="input-field" value="{{ factura['Total_Factura'] }}" readonly></td>
+                    <td><input type="text" name="subtotal" id="subtotal" class="input-field" value="{{ factura['Subtotal'] }}"></td>
+                    <td><input type="text" name="igv" id="igv" class="input-field" value="{{ factura['IGV'] }}"></td>
+                    <td><input type="text" name="total_factura" id="total" class="input-field" value="{{ factura['Total_Factura'] }}"></td>
                 </tr>
             </tbody>
         </table>
@@ -104,14 +106,15 @@
                 {% for detalle in detalles_factura %}
                 <tr>
                     <td>
-                        <select name="articulo_{{ loop.index }}" class="input-field">
+                        <select name="articulo[]" class="input-field" onchange="updatePrice(this)">
+                            <option value="" selected>Seleccionar Artículo</option>
                             {% for articulo in articulos %}
-                                <option value="{{ articulo['Codigo_Item'] }}" {% if articulo['Codigo_Item'] == detalle['Codigo_Item'] %} selected {% endif %}>{{ articulo['Descripcion'] }}</option>
+                                <option value="{{ articulo['Codigo_Item'] }}" {% if articulo['Codigo_Item'] == detalle['Codigo_Item'] %}selected{% endif %}>{{ articulo['Descripcion'] }}</option>
                             {% endfor %}
                         </select>
                     </td>
-                    <td><input type="number" name="cantidad_{{ loop.index }}" class="input-field" value="{{ detalle['Cantidad'] }}"></td>
-                    <td><input type="text" name="precio_{{ loop.index }}" class="input-field" value="{{ detalle['Precio_Venta'] }}" readonly></td>
+                    <td><input type="number" name="cantidad[]" class="input-field" value="{{ detalle['Cantidad'] }}" onchange="updateTotal()"></td>
+                    <td><input type="number" name="precio[]" class="input-field" step="any" value="{{ detalle['Precio_Venta'] }}" onchange="updateTotal()"></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -123,23 +126,53 @@
     <a href="/" class="btn">Regresar al Inicio</a>
 
     <script>
-        // Función para agregar dinámicamente filas para los detalles de factura
+        // Función para actualizar el precio al seleccionar un artículo
+        function updatePrice(select) {
+            var itemCode = select.value;
+            var articulos = {{ articulos | tojson }};
+            var selectedArticulo = articulos.find(a => a.Codigo_Item == itemCode);
+            var precioField = select.parentElement.nextElementSibling.nextElementSibling.querySelector('input');
+            precioField.value = selectedArticulo ? selectedArticulo.Precio : '';
+            updateTotal();
+        }
+
+        // Función para calcular el subtotal y el total
+        function updateTotal() {
+            var subtotal = 0;
+            var precio, cantidad;
+            var rows = document.querySelectorAll("#cuerpo-factura tbody tr");
+            rows.forEach(function(row) {
+                precio = parseFloat(row.querySelector("td:nth-child(3) input").value);
+                cantidad = parseFloat(row.querySelector("td:nth-child(2) input").value);
+                subtotal += precio * cantidad;
+            });
+
+            var igv = parseFloat(document.getElementById('igv').value);
+            var total = subtotal * (1 + igv / 100);
+
+            document.getElementById('subtotal').value = subtotal.toFixed(2);
+            document.getElementById('total').value = total.toFixed(2);
+        }
+    
+        // Función para agregar una nueva fila de artículo en la tabla
         function agregarArticulo() {
             var bodyTable = document.getElementById('cuerpo-factura').getElementsByTagName('tbody')[0];
             var newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td>
-                    <select name="nuevo_articulo" class="input-field">
+                    <select name="articulo[]" class="input-field" onchange="updatePrice(this)">
+                        <option value="" selected>Seleccionar Artículo</option>
                         {% for articulo in articulos %}
                             <option value="{{ articulo['Codigo_Item'] }}">{{ articulo['Descripcion'] }}</option>
                         {% endfor %}
                     </select>
                 </td>
-                <td><input type="number" name="nueva_cantidad" class="input-field"></td>
-                <td><input type="text" name="nuevo_precio" class="input-field"></td>
+                <td><input type="number" name="cantidad[]" class="input-field" onchange="updateTotal()"></td>
+                <td><input type="number" name="precio[]" class="input-field" step="any" onchange="updateTotal()"></td>
             `;
             bodyTable.appendChild(newRow);
         }
     </script>
 </body>
 </html>
+

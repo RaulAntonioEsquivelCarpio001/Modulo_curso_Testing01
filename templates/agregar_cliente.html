@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agregar Cliente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+        }
+        form {
+            width: 50%;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Agregar Cliente</h1>
+
+    <form action="/agregar_cliente" method="POST">
+        <label for="ruc_cliente">RUC Cliente:</label>
+        <input type="text" id="ruc_cliente" name="ruc_cliente" required><br>
+        <label for="nombre_cliente">Nombre:</label>
+        <input type="text" id="nombre_cliente" name="nombre_cliente" required><br>
+        <label for="apellido_cliente">Apellido:</label>
+        <input type="text" id="apellido_cliente" name="apellido_cliente" required><br>
+        <label for="direccion_cliente">Dirección:</label>
+        <input type="text" id="direccion_cliente" name="direccion_cliente"><br>
+        <label for="telefono_cliente">Teléfono:</label>
+        <input type="text" id="telefono_cliente" name="telefono_cliente"><br>
+        <input type="submit" value="Agregar Cliente">
+    </form>
+
+</body>
+</html>

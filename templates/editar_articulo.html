@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar Artículo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+        }
+        form {
+            width: 50%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            color: #007bff;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            margin-bottom: 10px;
+            width: calc(100% - 16px);
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Editar Artículo</h1>
+
+    <form action="/editar_articulo/{{ articulo['Codigo_Item'] }}" method="POST">
+        <label for="descripcion">Descripción:</label><br>
+        <input type="text" id="descripcion" name="descripcion" value="{{ articulo['Descripcion'] }}"><br>
+        <label for="precio">Precio:</label><br>
+        <input type="text" id="precio" name="precio" value="{{ articulo['Precio'] }}"><br>
+        <input type="submit" value="Guardar Cambios">
+    </form>
+
+</body>
+</html>
