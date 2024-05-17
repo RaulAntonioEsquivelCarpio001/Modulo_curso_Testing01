@@ -1,5 +1,7 @@
 from flask import *
 import pymysql
+import json
+
 
 app = Flask(__name__)
 
@@ -126,10 +128,31 @@ def eliminar_factura(numero_factura):
         return render_template('error.html', error=str(e))
 
 
+# Ruta para mostrar los vendedores
+@app.route('/vendedores')
+def mostrar_vendedores():
+    try:
+        with db.cursor() as cursor:
+            cursor.callproc('SeleccionarVendedores')
+            vendedores = cursor.fetchall()
+        return render_template('vendedores.html', vendedores=vendedores)
+    except pymysql.Error as e:
+        return "Error al obtener los vendedores de la base de datos: " + str(e)
 
-# Ruta para editar la factura
-@app.route('/editar_factura/<numero_factura>', methods=['GET', 'POST'])
-def editar_factura(numero_factura):
+# Ruta para eliminar un vendedor
+@app.route('/eliminar_vendedor/<codigo_vendedor>')
+def eliminar_vendedor(codigo_vendedor):
+    try:
+        with db.cursor() as cursor:
+            cursor.execute("DELETE FROM Vendedor WHERE Codigo_Vendedor = %s", (codigo_vendedor,))
+        db.commit()
+        return redirect(url_for('mostrar_vendedores'))
+    except pymysql.Error as e:
+        return "Error al eliminar el vendedor: " + str(e)
+
+# Ruta para editar un vendedor
+@app.route('/editar_vendedor/<codigo_vendedor>', methods=['GET', 'POST'])
+def editar_vendedor(codigo_vendedor):
     if request.method == 'GET':
         try:
             # Obtener los datos de la factura a editar desde la base de datos
@@ -161,90 +184,6 @@ def editar_factura(numero_factura):
             return render_template('editar_factura.html', factura=factura, detalles_factura=detalles_factura, clientes=clientes, vendedores=vendedores, articulos=articulos)
         except Exception as e:
             return render_template('error.html', error=str(e))
-    elif request.method == 'POST':
-        # Obtener los datos actualizados del formulario
-        numero_factura = request.form['numero_factura']
-        fecha_factura = request.form['fecha_factura']
-        ruc_cliente = request.form['ruc_cliente']
-        codigo_vendedor = request.form['codigo_vendedor']
-        subtotal = request.form['subtotal']
-        igv = request.form['igv']
-        total_factura = request.form['total_factura']
-
-        # Obtener los detalles del cuerpo de la factura
-        detalles_factura = []
-        for key, value in request.form.items():
-            if key.startswith('articulo_'):
-                codigo_item = value
-                cantidad = request.form['cantidad_' + key.split('_')[1]]
-                precio_venta = request.form['precio_' + key.split('_')[1]]
-                detalles_factura.append((codigo_item, cantidad, precio_venta))
-
-        # Actualizar los datos en la base de datos
-        try:
-            with db.cursor() as cursor:
-                # Actualizar la factura en la tabla Cabecera_Factura
-                cursor.execute("UPDATE Cabecera_Factura SET Fecha_Factura=%s, RUC_Cliente=%s, Codigo_Vendedor=%s, Subtotal=%s, IGV=%s, Total_Factura=%s WHERE Numero_Factura=%s", (fecha_factura, ruc_cliente, codigo_vendedor, subtotal, igv, total_factura, numero_factura))
-                
-                # Eliminar los registros existentes de Cuerpo_Factura para esta factura
-                cursor.execute("DELETE FROM Cuerpo_Factura WHERE Numero_Factura=%s", (numero_factura,))
-                
-                # Insertar los nuevos detalles de la factura en la tabla Cuerpo_Factura
-                for detalle in detalles_factura:
-                    cursor.execute("INSERT INTO Cuerpo_Factura (Numero_Factura, Codigo_Item, Cantidad, Precio_Venta) VALUES (%s, %s, %s, %s)", (numero_factura, detalle[0], detalle[1], detalle[2]))
-
-            # Realizar commit para guardar los cambios
-            db.commit()
-            # Redirigir a la página de ver factura con un mensaje de éxito
-            return redirect(url_for('ver_facturas'))
-        except pymysql.Error as e:
-            # En caso de error, hacer rollback y mostrar mensaje de error
-            db.rollback()
-            return render_template('error.html', error=str(e))
-
-# Ruta para mostrar los vendedores
-@app.route('/vendedores')
-def mostrar_vendedores():
-    try:
-        with db.cursor() as cursor:
-            cursor.callproc('SeleccionarVendedores')
-            vendedores = cursor.fetchall()
-        return render_template('vendedores.html', vendedores=vendedores)
-    except pymysql.Error as e:
-        return "Error al obtener los vendedores de la base de datos: " + str(e)
-
-# Ruta para eliminar un vendedor
-@app.route('/eliminar_vendedor/<codigo_vendedor>')
-def eliminar_vendedor(codigo_vendedor):
-    try:
-        with db.cursor() as cursor:
-            cursor.execute("DELETE FROM Vendedor WHERE Codigo_Vendedor = %s", (codigo_vendedor,))
-        db.commit()
-        return redirect(url_for('mostrar_vendedores'))
-    except pymysql.Error as e:
-        return "Error al eliminar el vendedor: " + str(e)
-
-# Ruta para editar un vendedor
-@app.route('/editar_vendedor/<codigo_vendedor>', methods=['GET', 'POST'])
-def editar_vendedor(codigo_vendedor):
-    if request.method == 'POST':
-        nombre_vendedor = request.form['nombre_vendedor']
-        apellido_vendedor = request.form['apellido_vendedor']
-        try:
-            with db.cursor() as cursor:
-                cursor.callproc('ActualizarVendedor', (codigo_vendedor, nombre_vendedor, apellido_vendedor))
-            db.commit()
-            return redirect(url_for('mostrar_vendedores'))
-        except pymysql.Error as e:
-            return "Error al actualizar el vendedor: " + str(e)
-    else:
-        try:
-            with db.cursor() as cursor:
-                cursor.execute("SELECT * FROM Vendedor WHERE Codigo_Vendedor = %s", (codigo_vendedor,))
-                vendedor = cursor.fetchone()
-            return render_template('editar_vendedor.html', vendedor=vendedor)
-        except pymysql.Error as e:
-            return "Error al obtener el vendedor: " + str(e)
 
 # Ruta para agregar un nuevo vendedor
 @app.route('/agregar_vendedor', methods=['GET', 'POST'])
@@ -389,6 +328,84 @@ def agregar_cliente():
     else:
         return render_template('agregar_cliente.html')
 
-
+@app.route('/editar_factura/<numero_factura>', methods=['GET', 'POST'])
+def editar_factura(numero_factura):
+    try:
+        if request.method == 'POST':
+            # Obtener datos del formulario
+            fecha_factura = request.form['fecha_factura']
+            ruc_cliente = request.form['ruc_cliente']
+            codigo_vendedor = request.form['codigo_vendedor']
+            subtotal = request.form['subtotal']
+            igv = request.form['igv']
+            total_factura = request.form['total_factura']
+            
+            articulos = request.form.getlist('articulo[]')
+            cantidades = request.form.getlist('cantidad[]')
+            precios = request.form.getlist('precio[]')
+            
+            # Actualizar cabecera de la factura
+            with db.cursor() as cursor:
+                sql_cabecera = """
+                    UPDATE Cabecera_Factura 
+                    SET Fecha_Factura = %s, RUC_Cliente = %s, Codigo_Vendedor = %s, Subtotal = %s, IGV = %s, Total_Factura = %s
+                    WHERE Numero_Factura = %s
+                """
+                cursor.execute(sql_cabecera, (fecha_factura, ruc_cliente, codigo_vendedor, subtotal, igv, total_factura, numero_factura))
+                
+                # Eliminar los detalles actuales de la factura
+                sql_delete_cuerpo = "DELETE FROM Cuerpo_Factura WHERE Numero_Factura = %s"
+                cursor.execute(sql_delete_cuerpo, (numero_factura,))
+                
+                # Insertar los nuevos detalles de la factura
+                for articulo, cantidad, precio in zip(articulos, cantidades, precios):
+                    sql_cuerpo = """
+                        INSERT INTO Cuerpo_Factura (Numero_Factura, Codigo_Item, Cantidad, Precio_Venta)
+                        VALUES (%s, %s, %s, %s)
+                    """
+                    cursor.execute(sql_cuerpo, (numero_factura, articulo, cantidad, precio))
+                
+                db.commit()
+                
+            return redirect(url_for('ver_facturas'))
+        
+        else:
+            with db.cursor(pymysql.cursors.DictCursor) as cursor:
+                # Obtener la cabecera de la factura
+                sql_cabecera = "SELECT * FROM Cabecera_Factura WHERE Numero_Factura = %s"
+                cursor.execute(sql_cabecera, (numero_factura,))
+                factura = cursor.fetchone()
+                
+                # Obtener los detalles de la factura
+                sql_detalles = """
+                    SELECT cf.*, a.Descripcion 
+                    FROM Cuerpo_Factura cf
+                    JOIN Articulo a ON cf.Codigo_Item = a.Codigo_Item
+                    WHERE cf.Numero_Factura = %s
+                """
+                cursor.execute(sql_detalles, (numero_factura,))
+                detalles_factura = cursor.fetchall()
+                
+                # Obtener la lista de clientes
+                sql_clientes = "SELECT * FROM Cliente"
+                cursor.execute(sql_clientes)
+                clientes = cursor.fetchall()
+                
+                # Obtener la lista de vendedores
+                sql_vendedores = "SELECT * FROM Vendedor"
+                cursor.execute(sql_vendedores)
+                vendedores = cursor.fetchall()
+                
+                # Obtener la lista de artículos
+                sql_articulos = "SELECT * FROM Articulo"
+                cursor.execute(sql_articulos)
+                articulos = cursor.fetchall()
+                
+            return render_template('editar_factura.html', factura=factura, detalles_factura=detalles_factura, clientes=clientes, vendedores=vendedores, articulos=articulos)
+    
+    except Exception as e:
+        return str(e)
+    
+    
 if __name__ == '__main__':
     app.run(debug=True)

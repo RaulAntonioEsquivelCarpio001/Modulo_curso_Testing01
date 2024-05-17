@@ -3,7 +3,6 @@
 <head>
     <title>Generar Factura</title>
     <style>
-
         /* Estilos para la tabla principal */
         .main-table {
             width: 100%;
@@ -23,7 +22,6 @@
         .main-table th {
             background-color: #f2f2f2;
         }
-
         /* Estilos para los campos de entrada */
         .input-field {
             width: 100%;
@@ -31,7 +29,6 @@
             margin-bottom: 10px;
             box-sizing: border-box;
         }
-
         /* Estilos para el botón de guardar */
         .btn {
             background-color: #4CAF50; /* Verde */
@@ -73,9 +70,8 @@
             </thead>
             <tbody>
                 <tr>
-                    <td><input type="text" name="numero_factura" class="input-field">
-                    <td><input type="date" name="fecha_factura" class="input-field"></td>
-
+                    <td><input type="text" name="numero_factura" class="input-field"></td>
+                    <td><input type="date" name="fecha_factura" id="fecha_factura" class="input-field" readonly></td>
                     <td>
                         <select name="ruc_cliente" id="cliente" class="input-field">
                             <option value="">Seleccionar Cliente</option>
@@ -97,11 +93,9 @@
                     <td><input type="text" name="subtotal" id="subtotal" class="input-field" readonly></td>
                     <td><input type="text" name="igv" id="igv" class="input-field" onchange="updateTotal()"></td>
                     <td><input type="text" name="total_factura" id="total" class="input-field" readonly></td>
-
                 </tr>
             </tbody>
         </table>
-
         <h2>Detalles de Cuerpo de Factura</h2>
         <table class="main-table" id="cuerpo-factura">
             <thead>
@@ -114,7 +108,7 @@
             <tbody>
                 <tr>
                     <td>
-                        <select name="articulo[]" class="input-field" onchange="updatePrice(this)">
+                        <select name="articulo[]" class="input-field" onchange="updatePrice(this); disableSelectedOptions();">
                             <option value="" selected>Seleccionar Artículo</option>
                             {% for articulo in articulos %}
                                 <option value="{{ articulo['Codigo_Item'] }}">{{ articulo['Descripcion'] }}</option>
@@ -133,7 +127,6 @@
     <a href="/" class="btn">Regresar al Inicio</a>
 
     <script>
-        // Función para llenar automáticamente la dirección y el teléfono del cliente al seleccionar uno
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('cliente').addEventListener('change', function() {
                 var clienteSeleccionado = this.value;
@@ -142,9 +135,11 @@
                 document.getElementById('direccion').value = cliente ? cliente.Direccion_Cliente : '';
                 document.getElementById('telefono').value = cliente ? cliente.Telefono_Cliente : '';
             });
+
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha_factura').value = today;
         });
-    
-        // Función para actualizar el precio al seleccionar un artículo
+
         function updatePrice(select) {
             var itemCode = select.value;
             var articulos = {{ articulos | tojson }};
@@ -154,7 +149,6 @@
             updateTotal();
         }
 
-        // Función para calcular el subtotal y el total
         function updateTotal() {
             var subtotal = 0;
             var precio, cantidad;
@@ -162,36 +156,31 @@
             rows.forEach(function(row) {
                 precio = parseFloat(row.querySelector("td:nth-child(3) input").value);
                 cantidad = parseFloat(row.querySelector("td:nth-child(2) input").value);
-                if (cantidad >= 0) { // Validar que la cantidad no sea negativa
+                if (cantidad >= 0) {
                     subtotal += precio * cantidad;
                 } else {
                     alert('La cantidad no puede ser negativa.');
-                    row.querySelector("td:nth-child(2) input").value = ''; // Limpiar el campo
+                    row.querySelector("td:nth-child(2) input").value = '';
                 }
             });
 
             var igv = parseFloat(document.getElementById('igv').value);
             if (igv >= 0) {
-        var total = subtotal * (1 + igv / 100);
-        document.getElementById('subtotal').value = subtotal.toFixed(2);
-        document.getElementById('total').value = total.toFixed(2);
-    } else {
-        alert('El IGV no puede ser un valor negativo.');
-        document.getElementById('igv').value = ''; // Limpiar el campo
-    }
-            var total = subtotal * (1 + igv / 100);
-
-            document.getElementById('subtotal').value = subtotal.toFixed(2);
-            document.getElementById('total').value = total.toFixed(2);
+                var total = subtotal * (1 + igv / 100);
+                document.getElementById('subtotal').value = subtotal.toFixed(2);
+                document.getElementById('total').value = total.toFixed(2);
+            } else {
+                alert('El IGV no puede ser un valor negativo.');
+                document.getElementById('igv').value = '';
+            }
         }
-    
-        // Función para agregar una nueva fila de artículo en la tabla
+
         function agregarArticulo() {
             var bodyTable = document.getElementById('cuerpo-factura').getElementsByTagName('tbody')[0];
             var newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td>
-                    <select name="articulo[]" class="input-field" onchange="updatePrice(this)">
+                    <select name="articulo[]" class="input-field" onchange="updatePrice(this); disableSelectedOptions();">
                         <option value="" selected>Seleccionar Artículo</option>
                         {% for articulo in articulos %}
                             <option value="{{ articulo['Codigo_Item'] }}">{{ articulo['Descripcion'] }}</option>
@@ -202,35 +191,48 @@
                 <td><input type="number" name="precio[]" class="input-field" step="any" onchange="updateTotal()"></td>
             `;
             bodyTable.appendChild(newRow);
+            disableSelectedOptions();
         }
-        // Función para validar el número de factura
-    function validarNumeroFactura(numeroFactura) {
-        var regex = /^[A-Za-z]+-?\d{1,14}$/; // Expresión regular para validar el número de factura
-        return regex.test(numeroFactura);
-    }
 
-    // Función para mostrar un mensaje de error
-    function mostrarMensajeError(mensaje) {
-        var errorDiv = document.getElementById('error_numero_factura');
-        errorDiv.textContent = mensaje;
-    }
-
-    // Función para limpiar el mensaje de error
-    function limpiarMensajeError() {
-        var errorDiv = document.getElementById('error_numero_factura');
-        errorDiv.textContent = '';
-    }
-
-    // Función para validar el formulario antes de enviarlo
-    document.querySelector('form').addEventListener('submit', function(event) {
-        var numeroFactura = document.querySelector('input[name="numero_factura"]').value;
-        if (!validarNumeroFactura(numeroFactura)) {
-            event.preventDefault(); // Evitar que se envíe el formulario
-            mostrarMensajeError('Número de Factura no válido. Ejemplos válidos: Fact-001, FACT001, BDG-001, etc.');
-        } else {
-            limpiarMensajeError(); // Limpiar el mensaje de error si el número de factura es válido
+        function disableSelectedOptions() {
+            var allSelects = document.querySelectorAll('select[name="articulo[]"]');
+            var selectedValues = Array.from(allSelects).map(select => select.value);
+            allSelects.forEach(select => {
+                var options = select.querySelectorAll('option');
+                options.forEach(option => {
+                    if (option.value === "" || !selectedValues.includes(option.value)) {
+                        option.disabled = false;
+                    } else {
+                        option.disabled = option.value !== select.value;
+                    }
+                });
+            });
         }
-    });
+
+        function validarNumeroFactura(numeroFactura) {
+            var regex = /^[A-Za-z]+-?\d{1,14}$/;
+            return regex.test(numeroFactura);
+        }
+
+        function mostrarMensajeError(mensaje) {
+            var errorDiv = document.getElementById('error_numero_factura');
+            errorDiv.textContent = mensaje;
+        }
+
+        function limpiarMensajeError() {
+            var errorDiv = document.getElementById('error_numero_factura');
+            errorDiv.textContent = '';
+        }
+
+        document.querySelector('form').addEventListener('submit', function(event) {
+            var numeroFactura = document.querySelector('input[name="numero_factura"]').value;
+            if (!validarNumeroFactura(numeroFactura)) {
+                event.preventDefault();
+                mostrarMensajeError('Número de Factura no válido. Ejemplos válidos: Fact-001, FACT001, BDG-001, etc.');
+            } else {
+                limpiarMensajeError();
+            }
+        });
     </script>
 </body>
 </html>

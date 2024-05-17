@@ -31,9 +31,9 @@ CREATE TABLE IF NOT EXISTS Cabecera_Factura (
     Fecha_Factura DATE, 
     RUC_Cliente VARCHAR(11), 
     Codigo_Vendedor VARCHAR(9), 
-    Subtotal DECIMAL(6,2), 
+    Subtotal DECIMAL(8,2), 
     IGV DECIMAL(6,2), 
-    Total_Factura DECIMAL(8,2), 
+    Total_Factura DECIMAL(10,2), 
     FOREIGN KEY(RUC_Cliente) REFERENCES Cliente(RUC_Cliente),
     FOREIGN KEY(Codigo_Vendedor) REFERENCES Vendedor(Codigo_Vendedor)
 );

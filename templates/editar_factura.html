@@ -3,47 +3,12 @@
 <head>
     <title>Editar Factura</title>
     <style>
-        /* Estilos para la tabla principal */
-        .main-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        .main-table th, .main-table td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-        .main-table th {
-            background-color: #f2f2f2;
-        }
-
-        /* Estilos para los campos de entrada */
-        .input-field {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            box-sizing: border-box;
-        }
-
-        /* Estilos para el botón de guardar */
-        .btn {
-            background-color: #4CAF50; /* Verde */
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            transition-duration: 0.4s;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #45a049; /* Verde más oscuro */
-            color: white;
-        }
+        .main-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .main-table th, .main-table td { border: 1px solid black; padding: 8px; text-align: left; }
+        .main-table th { background-color: #f2f2f2; }
+        .input-field { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        .btn { background-color: #4CAF50; border: none; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; transition-duration: 0.4s; cursor: pointer; }
+        .btn:hover { background-color: #45a049; color: white; }
     </style>
 </head>
 <body>
@@ -106,14 +71,14 @@
                 {% for detalle in detalles_factura %}
                 <tr>
                     <td>
-                        <select name="articulo[]" class="input-field" onchange="updatePrice(this)">
+                        <select name="articulo[]" class="input-field" onchange="updatePrice(this); disableSelectedOptions();">
                             <option value="" selected>Seleccionar Artículo</option>
                             {% for articulo in articulos %}
                                 <option value="{{ articulo['Codigo_Item'] }}" {% if articulo['Codigo_Item'] == detalle['Codigo_Item'] %}selected{% endif %}>{{ articulo['Descripcion'] }}</option>
                             {% endfor %}
                         </select>
                     </td>
-                    <td><input type="number" name="cantidad[]" class="input-field" value="{{ detalle['Cantidad'] }}" onchange="updateTotal()"></td>
+                    <td><input type="number" name="cantidad[]" class="input-field" value="{{ detalle['Cantidad'] }}" min="1" onchange="validateQuantity(this); updateTotal()"></td>
                     <td><input type="number" name="precio[]" class="input-field" step="any" value="{{ detalle['Precio_Venta'] }}" onchange="updateTotal()"></td>
                 </tr>
                 {% endfor %}
@@ -122,11 +87,9 @@
         <button type="button" onclick="agregarArticulo()" class="btn">Agregar Artículo</button>
         <button type="submit" class="btn">Actualizar Factura</button>
     </form>
-    <!-- Botón para regresar al índice -->
     <a href="/" class="btn">Regresar al Inicio</a>
 
     <script>
-        // Función para actualizar el precio al seleccionar un artículo
         function updatePrice(select) {
             var itemCode = select.value;
             var articulos = {{ articulos | tojson }};
@@ -136,7 +99,14 @@
             updateTotal();
         }
 
-        // Función para calcular el subtotal y el total
+        function validateQuantity(input) {
+            if (input.value < 1) {
+                alert("La cantidad no puede ser menor a 1.");
+                input.value = 1;
+            }
+            updateTotal();
+        }
+
         function updateTotal() {
             var subtotal = 0;
             var precio, cantidad;
@@ -153,26 +123,60 @@
             document.getElementById('subtotal').value = subtotal.toFixed(2);
             document.getElementById('total').value = total.toFixed(2);
         }
-    
-        // Función para agregar una nueva fila de artículo en la tabla
+
         function agregarArticulo() {
             var bodyTable = document.getElementById('cuerpo-factura').getElementsByTagName('tbody')[0];
             var newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td>
-                    <select name="articulo[]" class="input-field" onchange="updatePrice(this)">
+                    <select name="articulo[]" class="input-field" onchange="updatePrice(this); disableSelectedOptions();">
                         <option value="" selected>Seleccionar Artículo</option>
                         {% for articulo in articulos %}
                             <option value="{{ articulo['Codigo_Item'] }}">{{ articulo['Descripcion'] }}</option>
                         {% endfor %}
                     </select>
                 </td>
-                <td><input type="number" name="cantidad[]" class="input-field" onchange="updateTotal()"></td>
+                <td><input type="number" name="cantidad[]" class="input-field" min="0" onchange="validateQuantity(this); updateTotal()"></td>
                 <td><input type="number" name="precio[]" class="input-field" step="any" onchange="updateTotal()"></td>
             `;
             bodyTable.appendChild(newRow);
+            disableSelectedOptions();
         }
+
+        function disableSelectedOptions() {
+            var allSelects = document.querySelectorAll('select[name="articulo[]"]');
+            var selectedValues = Array.from(allSelects).map(select => select.value);
+            allSelects.forEach(select => {
+                var options = select.querySelectorAll('option');
+                options.forEach(option => {
+                    if (option.value === "" || !selectedValues.includes(option.value)) {
+                        option.disabled = false;
+                    } else {
+                        option.disabled = option.value !== select.value;
+                    }
+                });
+            });
+        }
+
+        function imprimirDetallesFactura() {
+            var articulos = document.getElementsByName("articulo[]");
+            var cantidades = document.getElementsByName("cantidad[]");
+            var precios = document.getElementsByName("precio[]");
+
+            for (var i = 0; i < articulos.length; i++) {
+                console.log("Artículo:", articulos[i].value);
+                console.log("Cantidad:", cantidades[i].value);
+                console.log("Precio:", precios[i].value);
+            }
+        }
+
+        document.querySelector("form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            imprimirDetallesFactura();
+            this.submit();
+        });
+
+        document.addEventListener('DOMContentLoaded', disableSelectedOptions);
     </script>
 </body>
 </html>
-
