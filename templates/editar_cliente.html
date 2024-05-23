@@ -22,6 +22,7 @@
         label {
             display: block;
             margin-bottom: 10px;
+            color: #007bff;
         }
         input[type="text"] {
             width: calc(100% - 20px);
@@ -46,18 +47,52 @@
             background-color: #0056b3;
         }
     </style>
+    <script>
+        function validateForm() {
+            let nombre = document.getElementById("nombre_cliente").value;
+            let apellido = document.getElementById("apellido_cliente").value;
+            let direccion = document.getElementById("direccion_cliente").value;
+            let telefono = document.getElementById("telefono_cliente").value;
+
+            // Validar que el nombre no contenga números y no esté vacío
+            if (/\d/.test(nombre) || nombre.trim() === "") {
+                alert("El nombre no puede contener números o estar vacío.");
+                return false;
+            }
+
+            // Validar que el apellido no contenga números y no esté vacío
+            if (/\d/.test(apellido) || apellido.trim() === "") {
+                alert("El apellido no puede contener números o estar vacío.");
+                return false;
+            }
+
+            // Validar que la dirección no esté vacía y no comience con un número negativo
+            if (direccion.trim() === "" || /^-/.test(direccion)) {
+                alert("La dirección no puede estar vacía o comenzar con un número negativo.");
+                return false;
+            }
+
+            // Validar que el teléfono solo contenga números
+            if (!/^\d+$/.test(telefono) && telefono.trim() !== "") {
+                alert("El teléfono solo puede contener números.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
 </head>
 <body>
 
     <h1>Editar Cliente</h1>
 
-    <form action="/editar_cliente/{{ cliente['RUC_Cliente'] }}" method="POST">
+    <form action="/editar_cliente/{{ cliente['RUC_Cliente'] }}" method="POST" onsubmit="return validateForm()">
         <label for="nombre_cliente">Nombre:</label>
         <input type="text" id="nombre_cliente" name="nombre_cliente" value="{{ cliente['Nombre_Cliente'] }}" required><br>
         <label for="apellido_cliente">Apellido:</label>
         <input type="text" id="apellido_cliente" name="apellido_cliente" value="{{ cliente['Apellido_Cliente'] }}" required><br>
         <label for="direccion_cliente">Dirección:</label>
-        <input type="text" id="direccion_cliente" name="direccion_cliente" value="{{ cliente['Direccion_Cliente'] }}"><br>
+        <input type="text" id="direccion_cliente" name="direccion_cliente" value="{{ cliente['Direccion_Cliente'] }}" required><br>
         <label for="telefono_cliente">Teléfono:</label>
         <input type="text" id="telefono_cliente" name="telefono_cliente" value="{{ cliente['Telefono_Cliente'] }}"><br>
         <input type="submit" value="Guardar Cambios">

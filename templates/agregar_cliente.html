@@ -22,6 +22,7 @@
         label {
             display: block;
             margin-bottom: 10px;
+            color: #007bff;
         }
         input[type="text"] {
             width: calc(100% - 20px);
@@ -46,12 +47,53 @@
             background-color: #0056b3;
         }
     </style>
+    <script>
+        function validateForm() {
+            let ruc = document.getElementById("ruc_cliente").value;
+            let nombre = document.getElementById("nombre_cliente").value;
+            let apellido = document.getElementById("apellido_cliente").value;
+            let direccion = document.getElementById("direccion_cliente").value;
+            let telefono = document.getElementById("telefono_cliente").value;
+
+            // Validar que RUC no sea una cadena de números negativos
+            if (/^-/.test(ruc) || ruc.trim() === "") {
+                alert("El RUC no puede ser negativo o estar vacío.");
+                return false;
+            }
+
+            // Validar que el nombre no contenga números y no esté vacío
+            if (/\d/.test(nombre) || nombre.trim() === "") {
+                alert("El nombre no puede contener números o estar vacío.");
+                return false;
+            }
+
+            // Validar que el apellido no contenga números y no esté vacío
+            if (/\d/.test(apellido) || apellido.trim() === "") {
+                alert("El apellido no puede contener números o estar vacío.");
+                return false;
+            }
+
+            // Validar que la dirección no esté vacía y no comience con un número negativo
+            if (direccion.trim() === "" || /^-/.test(direccion)) {
+                alert("La dirección no puede estar vacía o comenzar con un número negativo.");
+                return false;
+            }
+
+            // Validar que el teléfono solo contenga números
+            if (!/^\d+$/.test(telefono) && telefono.trim() !== "") {
+                alert("El teléfono solo puede contener números.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
 </head>
 <body>
 
     <h1>Agregar Cliente</h1>
 
-    <form action="/agregar_cliente" method="POST">
+    <form action="/agregar_cliente" method="POST" onsubmit="return validateForm()">
         <label for="ruc_cliente">RUC Cliente:</label>
         <input type="text" id="ruc_cliente" name="ruc_cliente" required><br>
         <label for="nombre_cliente">Nombre:</label>
@@ -59,7 +101,7 @@
         <label for="apellido_cliente">Apellido:</label>
         <input type="text" id="apellido_cliente" name="apellido_cliente" required><br>
         <label for="direccion_cliente">Dirección:</label>
-        <input type="text" id="direccion_cliente" name="direccion_cliente"><br>
+        <input type="text" id="direccion_cliente" name="direccion_cliente" required><br>
         <label for="telefono_cliente">Teléfono:</label>
         <input type="text" id="telefono_cliente" name="telefono_cliente"><br>
         <input type="submit" value="Agregar Cliente">

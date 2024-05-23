@@ -42,16 +42,39 @@
             background-color: #0056b3;
         }
     </style>
+    <script>
+        function validateForm() {
+            let descripcion = document.getElementById("descripcion").value;
+            let precio = document.getElementById("precio").value;
+
+            // Validar que la descripción no esté vacía y no tenga números negativos
+            if (descripcion.trim() === "") {
+                alert("La descripción no puede estar vacía.");
+                return false;
+            }
+            if (/^-/.test(descripcion)) {
+                alert("La descripción no puede contener números negativos.");
+                return false;
+            }
+
+            // Validar que el precio sea un número mayor a cero
+            if (precio <= 0 || isNaN(precio)) {
+                alert("El precio debe ser un número mayor a cero.");
+                return false;
+            }
+            return true;
+        }
+    </script>
 </head>
 <body>
 
     <h1>Agregar Artículo</h1>
 
-    <form action="/agregar_articulo" method="POST">
+    <form action="/agregar_articulo" method="POST" onsubmit="return validateForm()">
         <label for="descripcion">Descripción:</label><br>
         <input type="text" id="descripcion" name="descripcion" required><br>
         <label for="precio">Precio:</label><br>
-        <input type="text" id="precio" name="precio" required><br>
+        <input type="number" step="0.01" id="precio" name="precio" required><br>
         <input type="submit" value="Agregar Artículo">
     </form>
 

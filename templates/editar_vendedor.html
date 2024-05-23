@@ -21,11 +21,13 @@
         }
         label {
             color: #007bff;
+            display: block;
+            margin-bottom: 5px;
         }
         input[type="text"], input[type="submit"] {
             padding: 8px;
             margin-bottom: 10px;
-            width: 100%;
+            width: calc(100% - 16px);
             border: 1px solid #007bff;
             border-radius: 4px;
             box-sizing: border-box;
@@ -42,16 +44,36 @@
             background-color: #0056b3;
         }
     </style>
+    <script>
+        function validateForm() {
+            let nombreVendedor = document.getElementById("nombre_vendedor").value;
+            let apellidoVendedor = document.getElementById("apellido_vendedor").value;
+
+            // Validar que el nombre no contenga números y no esté vacío
+            if (/\d/.test(nombreVendedor) || nombreVendedor.trim() === "") {
+                alert("El nombre no puede contener números ni estar vacío.");
+                return false;
+            }
+
+            // Validar que el apellido no contenga números y no esté vacío
+            if (/\d/.test(apellidoVendedor) || apellidoVendedor.trim() === "") {
+                alert("El apellido no puede contener números ni estar vacío.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
 </head>
 <body>
 
     <h1>Editar Vendedor</h1>
 
-    <form action="/editar_vendedor/{{ vendedor['Codigo_Vendedor'] }}" method="POST">
-        <label for="nombre_vendedor">Nombre:</label><br>
-        <input type="text" id="nombre_vendedor" name="nombre_vendedor" value="{{ vendedor['Nombre_Vendedor'] }}"><br>
-        <label for="apellido_vendedor">Apellido:</label><br>
-        <input type="text" id="apellido_vendedor" name="apellido_vendedor" value="{{ vendedor['Apellido_Vendedor'] }}"><br>
+    <form action="/editar_vendedor/{{ vendedor['Codigo_Vendedor'] }}" method="POST" onsubmit="return validateForm()">
+        <label for="nombre_vendedor">Nombre:</label>
+        <input type="text" id="nombre_vendedor" name="nombre_vendedor" value="{{ vendedor['Nombre_Vendedor'] }}" required><br>
+        <label for="apellido_vendedor">Apellido:</label>
+        <input type="text" id="apellido_vendedor" name="apellido_vendedor" value="{{ vendedor['Apellido_Vendedor'] }}" required><br>
         <input type="submit" value="Guardar Cambios">
     </form>
 

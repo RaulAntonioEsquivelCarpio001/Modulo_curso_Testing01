@@ -153,35 +153,31 @@ def eliminar_vendedor(codigo_vendedor):
 # Ruta para editar un vendedor
 @app.route('/editar_vendedor/<codigo_vendedor>', methods=['GET', 'POST'])
 def editar_vendedor(codigo_vendedor):
-    if request.method == 'GET':
+    if request.method == 'POST':
         try:
-            # Obtener los datos de la factura a editar desde la base de datos
+            # Obtener los nuevos datos del formulario
+            nuevo_nombre = request.form['nuevo_nombre']
+            nuevo_apellido = request.form['nuevo_apellido']
+
+            # Llamar al procedimiento almacenado para actualizar el vendedor en la base de datos
             with db.cursor() as cursor:
-                # Consulta para obtener los detalles de la factura
-                cursor.execute("SELECT * FROM Cuerpo_Factura WHERE Numero_Factura = %s", (numero_factura,))
-                detalles_factura = cursor.fetchall()
+                cursor.callproc('ActualizarVendedor', (codigo_vendedor, nuevo_nombre, nuevo_apellido))
+                db.commit()
 
-                # Consulta para obtener la factura
-                cursor.execute("SELECT * FROM Cabecera_Factura WHERE Numero_Factura = %s", (numero_factura,))
-                factura = cursor.fetchone()
-
-            # Obtener la lista de clientes desde la base de datos
+            # Redireccionar a la página de vendedores después de la edición exitosa
+            return redirect(url_for('vendedores'))
+        except Exception as e:
+            # Manejar cualquier error y mostrar una página de error
+            return render_template('error.html', error=str(e))
+    elif request.method == 'GET':
+        try:
+            # Obtener los datos del vendedor a editar desde la base de datos
             with db.cursor() as cursor:
-                cursor.callproc('SeleccionarClientes')
-                clientes = cursor.fetchall()
+                cursor.execute("SELECT * FROM Vendedor WHERE Codigo_Vendedor = %s", (codigo_vendedor,))
+                vendedor = cursor.fetchone()
 
-            # Obtener la lista de vendedores desde la base de datos
-            with db.cursor() as cursor:
-                cursor.callproc('SeleccionarVendedores')
-                vendedores = cursor.fetchall()
-
-            # Obtener la lista de artículos desde la base de datos
-            with db.cursor() as cursor:
-                cursor.callproc('SeleccionarArticulos')
-                articulos = cursor.fetchall()
-
-            # Renderizar la plantilla editar.html con los datos obtenidos
-            return render_template('editar_factura.html', factura=factura, detalles_factura=detalles_factura, clientes=clientes, vendedores=vendedores, articulos=articulos)
+            # Renderizar la plantilla editar_vendedor.html con los datos obtenidos
+            return render_template('editar_vendedor.html', vendedor=vendedor)
         except Exception as e:
             return render_template('error.html', error=str(e))
 
